@@ -1,0 +1,16 @@
+check,value
+n_protein_records,1766
+n_unique_acc,1766
+n_unique_disprot_id,1766
+duplicate_acc_across_files,0
+length_vs_sequence_mismatch,0
+missing_accession,0
+D_exp_out_of_unit_interval,0
+proteins_with_ambiguous_S_segments,4
+disorder_content_matches_D_or_S_coverage,1766
+af_value_missing,103
+n_regions_total,7535
+regions_missing_boundaries,0
+regions_with_end_beyond_length,0
+regions_counter_matches_region_rows,1221
+duplicate_region_ids,0

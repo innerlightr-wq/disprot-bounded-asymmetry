@@ -1,0 +1,14 @@
+# Runtime dependencies for the bounded-asymmetry DisProt pipeline.
+#
+# NumPy 2.x is REQUIRED, not merely preferred: src/02_asymmetry.py calls
+# numpy.trapezoid, which was introduced in NumPy 2.0 (it replaced the
+# deprecated numpy.trapz). The scientific code is not rewritten for NumPy 1.x
+# compatibility.
+#
+# Upper bounds are next-major-version caps, to guard against silent behavioural
+# changes in a future major release rather than to exclude any known-bad build.
+
+numpy>=2.0,<3
+pandas>=2.2,<3
+scipy>=1.13,<2
+matplotlib>=3.8,<4

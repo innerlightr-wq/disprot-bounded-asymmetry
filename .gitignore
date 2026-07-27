@@ -1,0 +1,29 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS cruft
+.DS_Store
+.AppleDouble
+Thumbs.db
+Desktop.ini
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# NOTE: results/ is deliberately NOT ignored.
+# The regenerated tables, figures and diagnostics under results/ are part of
+# the reproducibility record and are committed on purpose, as are the archival
+# copies in results/deposited_originals/ and the input exports in data/raw/.

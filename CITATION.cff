@@ -1,0 +1,120 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite it using the metadata in this file. The
+  associated manuscript is not yet published; once it is, cite the article in
+  preference to the software.
+title: >-
+  Bounded asymmetry profiles for protein disorder distributions: analysis
+  pipeline
+abstract: >-
+  Reproducibility package for a methodological study defining a bounded local
+  asymmetry profile S(x) over a continuous feature coordinate, with three scalar
+  summaries, evaluated on experimentally curated intrinsic disorder annotations
+  for 1,766 proteins from four taxa (DisProt release 2026_06). Regenerates every
+  manuscript table, figure and diagnostic from the deposited input files with a
+  single command.
+type: software
+version: 1.0.0
+date-released: "2026-07-27"
+license: MIT
+repository-code: "https://github.com/innerlightr-wq/disprot-bounded-asymmetry"
+url: "https://github.com/innerlightr-wq/disprot-bounded-asymmetry"
+
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.21628406
+    description: >-
+      Zenodo archive of the preprint and the original pre-refactor analysis
+      files (version v8, published 2026-07-27). Verified to resolve on
+      2026-07-27. TODO: replace with the Zenodo concept DOI, which always
+      resolves to the latest version; it is available on the record page under
+      "Versions -> Cite all versions?".
+authors:
+  - family-names: "De Jesús"
+    given-names: "Elias"
+    orcid: "https://orcid.org/0009-0007-0190-9143"
+    affiliation: "Independent Researcher, Virginia, USA"
+    email: "dejesuselias10@gmail.com"
+keywords:
+  - intrinsically disordered proteins
+  - DisProt
+  - AlphaFold
+  - pLDDT
+  - distributional comparison
+  - cross-taxon calibration
+  - reproducibility
+
+# ---------------------------------------------------------------------------
+# NOT YET PUBLISHED
+#
+# The manuscript in paper/manuscript.pdf has not been accepted by a journal, so
+# this file deliberately carries NO journal name, volume, issue, page range or
+# article DOI, and no `preferred-citation` block. Every field below is presently
+# true. Nothing is a placeholder standing in for a real value.
+#
+# TODO: after formal acceptance, add a `preferred-citation:` block of type
+#       `article` with the journal name, year, volume, issue, pages and article
+#       DOI. Until then the software citation above is the correct one to use.
+# ---------------------------------------------------------------------------
+
+# The input data are third-party records under CC BY 4.0. Attribution is
+# required; full terms and text are in DATA_LICENSE.md.
+references:
+  - type: article
+    title: >-
+      DisProt in 2026: enhancing intrinsically disordered proteins accessibility,
+      deposition, and annotation
+    authors:
+      - family-names: "Nugnes"
+        given-names: "Maria Victoria"
+      - family-names: "Bouhraoua"
+        given-names: "Kamel Eddine Adel"
+      - family-names: "Zoubiri"
+        given-names: "Mehdi"
+      - family-names: "Pancsa"
+        given-names: "Rita"
+      - family-names: "Fichó"
+        given-names: "Erzsébet"
+      - name: "DisProt Consortium"
+      - family-names: "Tompa"
+        given-names: "Peter"
+      - family-names: "Piovesan"
+        given-names: "Damiano"
+      - family-names: "Tosatto"
+        given-names: "Silvio C. E."
+      - family-names: "Aspromonte"
+        given-names: "Maria Cristina"
+    journal: "Nucleic Acids Research"
+    year: 2026
+    volume: 54
+    issue: D1
+    start: D383
+    end: D392
+    doi: 10.1093/nar/gkaf1175
+    license: CC-BY-4.0
+    notes: >-
+      Source of the four per-organism JSON exports in data/raw (release 2026_06,
+      with-ambiguous-evidences variant).
+  - type: article
+    title: >-
+      Best practices for the manual curation of intrinsically disordered proteins
+      in DisProt
+    authors:
+      - family-names: "Quaglia"
+        given-names: "Federica"
+      - family-names: "Chasapi"
+        given-names: "A."
+      - family-names: "Nugnes"
+        given-names: "Maria Victoria"
+      - family-names: "Aspromonte"
+        given-names: "Maria Cristina"
+      - family-names: "Leonardi"
+        given-names: "Emanuela"
+      - family-names: "Piovesan"
+        given-names: "Damiano"
+      - family-names: "Tosatto"
+        given-names: "Silvio C. E."
+    journal: "Database"
+    year: 2024
+    doi: 10.1093/database/baae009
+    notes: "Curation methodology behind the annotations analysed here."

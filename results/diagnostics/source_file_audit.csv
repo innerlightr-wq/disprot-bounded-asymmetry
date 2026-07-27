@@ -1,0 +1,5 @@
+file,bytes,md5,n_records,n_unique_acc,organism,ncbi_taxon_id
+disprot_taxon_9606_homo_sapiens.json,12221224,0562d49c7a55bb2bbf018b49106c437a,1339,1339,Homo sapiens,9606
+disprot_taxon_559292_saccharomyces_cerevisiae.json,1774393,7f3444caf3ec364eedbf3a4e60801531,223,223,Saccharomyces cerevisiae (strain ATCC 204508 / S288c),559292
+disprot_taxon_83333_escherichia_coli_k12.json,948678,df0b07151610e12043d687362cb935c2,146,146,Escherichia coli (strain K12),83333
+disprot_taxon_6239_caenorhabditis_elegans.json,377380,8f652e6124b72fc87dd77a2521900697,58,58,Caenorhabditis elegans,6239

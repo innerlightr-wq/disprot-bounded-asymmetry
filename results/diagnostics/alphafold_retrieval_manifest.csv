@@ -1,0 +1,6 @@
+source,endpoint,purpose,attempt_date,http_status,proxy_deny_reason,outcome,note
+AlphaFold Protein Structure Database,https://alphafold.ebi.ac.uk/api/prediction/{acc},"residue-level pLDDT, model id/version",2026-07-26,403.0,host_not_allowed,FAILED,Sandbox egress allowlist excludes this host; no accessions retrieved.
+AlphaFold Protein Structure Database,https://alphafold.ebi.ac.uk/files/AF-{acc}-F1-confidence_v4.json,confidenceScore array (pLDDT),2026-07-26,,host_not_allowed,FAILED,Not reachable from container; also not fetchable via the assistant web tool (URL not in prior results).
+UniProt REST,https://rest.uniprot.org/uniprotkb/{acc}.json,"sequence, length, review status, isoform status",2026-07-26,403.0,host_not_allowed,FAILED,Sequence and length were instead taken from the DisProt export and internally cross-checked.
+MobiDB,https://mobidb.org/api/download?acc={acc}&format=json,consensus disorder annotation,2026-07-26,403.0,host_not_allowed,FAILED,No MobiDB comparison possible.
+DisProt API,https://disprot.org/api/{disprot_id},verify export completeness vs regions_counter,2026-07-26,403.0,host_not_allowed,FAILED,regions_counter discrepancy could not be resolved against the live database.

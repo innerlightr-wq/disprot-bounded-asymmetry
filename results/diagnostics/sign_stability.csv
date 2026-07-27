@@ -1,0 +1,13 @@
+feature,group_A,group_B,n_specs,n_pos,n_neg,sign_stable
+D_exp,Bacterial,Nematode,9,3,6,False
+D_exp,Fungal,Bacterial,9,9,0,True
+D_exp,Fungal,Nematode,9,9,0,True
+D_exp,Human,Bacterial,9,9,0,True
+D_exp,Human,Fungal,9,1,8,False
+D_exp,Human,Nematode,9,8,1,False
+af_very_low_content,Bacterial,Nematode,9,0,9,True
+af_very_low_content,Fungal,Bacterial,9,9,0,True
+af_very_low_content,Fungal,Nematode,9,3,6,False
+af_very_low_content,Human,Bacterial,9,9,0,True
+af_very_low_content,Human,Fungal,9,9,0,True
+af_very_low_content,Human,Nematode,9,3,6,False

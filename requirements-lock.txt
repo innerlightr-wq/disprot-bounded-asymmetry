@@ -1,0 +1,13 @@
+# Exact versions used for the verification run recorded in
+# results/README.md (2026-07-27). Under this environment the pipeline
+# reproduces every archived numerical output bit-for-bit.
+#
+# Python 3.12.3 on Linux x86_64 (glibc 2.39).
+#
+# Install with:
+#     pip install -r requirements-lock.txt
+
+numpy==2.4.4
+pandas==3.0.2
+scipy==1.17.1
+matplotlib==3.10.8
