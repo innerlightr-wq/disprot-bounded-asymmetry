@@ -100,8 +100,14 @@ being silently omitted, and they bound what the study can claim — see
 │   ├── figures/                Figures 1–6 as PDF and PNG
 │   └── deposited_originals/    archival copies from the earlier deposit — DO NOT EDIT
 │
-└── paper/
-    └── manuscript.pdf
+├── paper/
+│   └── manuscript.pdf
+│
+└── revision_addendum/
+    ├── README.md               contents and purpose of the addendum
+    ├── ADDENDUM_permutation_calibration.pdf
+    ├── permutation_results.csv
+    └── bounded-asymmetry-profiles-cross-taxon-protein-disorder-2026.pdf
 ```
 
 Two notes on this layout:
@@ -307,6 +313,14 @@ Note that `paper/manuscript.pdf` contains its own Data Availability Statement
 and "How to Cite" block with their own identifiers. Those are part of the
 manuscript and are deliberately left untouched by this repository; if they
 disagree with anything here, the manuscript is the item that needs updating.
+
+## Revision Addendum
+
+Following an independent external methodological review, an additional
+permutation-based statistical calibration was performed. The supporting
+materials are provided in the [`revision_addendum/`](revision_addendum/)
+directory. These materials supplement the original manuscript while preserving
+the reproducibility of the original computational workflow.
 
 ## Contact
 
