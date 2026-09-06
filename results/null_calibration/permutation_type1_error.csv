@@ -1,0 +1,10 @@
+condition,family,n_A,n_B,statistic,n_outer_calib,n_perm,empirical_type1_rate,monte_carlo_se
+equal_interior,A_interior_unimodal,200,200,A_bar,200,200,0.025,0.015411035007422441
+equal_interior,A_interior_unimodal,200,200,A_w,200,200,0.015,0.015411035007422441
+equal_interior,A_interior_unimodal,200,200,ks_stat,200,200,0.08,0.015411035007422441
+severe_imbalance_interior,A_interior_unimodal,150,1350,A_bar,200,200,0.03,0.015411035007422441
+severe_imbalance_interior,A_interior_unimodal,150,1350,A_w,200,200,0.065,0.015411035007422441
+severe_imbalance_interior,A_interior_unimodal,150,1350,ks_stat,200,200,0.03,0.015411035007422441
+severe_imbalance_boundary,C_boundary_heavy,150,1350,A_bar,200,200,0.02,0.015411035007422441
+severe_imbalance_boundary,C_boundary_heavy,150,1350,A_w,200,200,0.05,0.015411035007422441
+severe_imbalance_boundary,C_boundary_heavy,150,1350,ks_stat,200,200,0.055,0.015411035007422441

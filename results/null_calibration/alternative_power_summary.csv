@@ -1,0 +1,7 @@
+power_A_bar_perm,power_A_w_perm,power_KS,alternative,n_A,n_B,condition,n_outer,n_perm
+1.0,1.0,1.0,alt1_location_shift,200,200,equal_interior,150,150
+1.0,1.0,1.0,alt1_location_shift,150,1350,severe_imbalance,150,150
+1.0,1.0,0.7933333333333333,alt2_variance_change,200,200,equal_interior,150,150
+1.0,1.0,0.98,alt2_variance_change,150,1350,severe_imbalance,150,150
+0.9666666666666667,0.92,0.9066666666666666,alt3_localized_mixture,200,200,equal_interior,150,150
+0.9733333333333334,1.0,0.9933333333333333,alt3_localized_mixture,150,1350,severe_imbalance,150,150
