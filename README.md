@@ -34,24 +34,73 @@ annotations for **1,766 proteins** across four taxa (DisProt release 2026_06):
 1,339 human, 223 *Saccharomyces cerevisiae*, 146 *Escherichia coli* K12, and 58
 *Caenorhabditis elegans*.
 
-The report has three findings, two of them negative:
+> **Revision notice (2026-07-28).** An independent permutation-calibration
+> audit of this study's inferential procedures found that the original
+> human–*E. coli* localisation claim lay inside its own null distribution and
+> has been **withdrawn**, and that the claim "the profile adds sensitivity
+> beyond scalar two-sample testing" is **reversed**: in this dataset the
+> profile's rejection set is a strict subset of the Kolmogorov–Smirnov
+> rejection set. The findings below reflect that audit. Full detail, the
+> claim-by-claim disposition, and the revised manuscript are in
+> [`revision_addendum/`](revision_addendum/), which should be read in
+> preference to `paper/manuscript.pdf` for current substantive conclusions.
 
-1. **The profile adds information beyond global tests.** For human vs.
-   *E. coli* curated disorder it resolves localised structure (`Ā = 0.143`,
-   `C = 0.57`, two zero crossings) in a comparison that global tests read as
-   null (KS *p* = 0.39, Mann–Whitney *p* = 0.85).
-2. **The AlphaFold-derived very-low-confidence fraction is a poor
+The report's current findings, after the revision addendum above:
+
+1. **The AlphaFold-derived very-low-confidence fraction is a poor
    protein-level proxy for curated disorder** in every taxon examined
    (Spearman ρ = 0.07–0.24), and its offset relative to curated disorder is
    taxon-dependent (median signed gap +0.001 human vs. −0.083 *E. coli*,
-   Mann–Whitney *p* < 10⁻⁴). This is the study's gating result: it is reported
-   even though it blocks the intended downstream application.
-3. **The scalar magnitude index `Ā` is estimator-dependent.** It inflates from
-   0.181 to 0.333 with histogram bin count because empty bins drive |S| → 1,
-   and the signed index changes sign in 5 of 12 comparisons under histogram
-   estimation while remaining stable across every kernel bandwidth and
-   regularisation constant tested. Kernel estimation with a reported bandwidth
-   is therefore required for the framework to be reproducible.
+   Mann–Whitney *p* < 10⁻⁴). This is the study's gating result and its
+   strongest retained finding: it is reported even though it blocks the
+   intended downstream application.
+2. **The bounded asymmetry profile is a descriptive instrument, not
+   currently an inferential one.** For human vs. *E. coli* curated disorder it
+   produces `Ā = 0.143`, `C = 0.57`, and two zero crossings in a comparison
+   that global tests read as null (KS *p* = 0.39, Mann–Whitney *p* = 0.85) —
+   but permutation calibration shows this `Ā` value lies inside its own null
+   distribution (median 0.111, 95th percentile 0.174, raw *p* = 0.18), and the
+   simultaneous null band does not exclude zero anywhere in this comparison.
+   **This example is descriptive only** and does not demonstrate genuine
+   localised population structure. Across the twelve calibrated comparisons in
+   `revision_addendum/`, the profile's rejection set is a **strict subset** of
+   the Kolmogorov–Smirnov rejection set — the original claim that the profile
+   adds sensitivity beyond scalar two-sample testing is reversed, not
+   supported.
+3. **The scalar magnitude index `Ā` is estimator-dependent, and its
+   finite-sample null baseline can be materially nonzero even under a fixed
+   estimator.** It inflates from 0.181 to 0.333 with histogram bin count
+   because empty bins drive |S| → 1, and the signed index changes sign in 5 of
+   12 comparisons under histogram estimation while remaining stable across
+   every kernel bandwidth and regularisation constant tested — kernel
+   estimation with a reported bandwidth is required for the framework to be
+   reproducible. Separately, and more importantly: permutation calibration
+   found that even under the fixed KDE estimator, `Ā`'s null median ranges
+   from 0.089 to 0.398 across the twelve tested comparisons, driven by
+   differential Scott's-rule bandwidth selection under unequal sample sizes —
+   unequal group sizes select different bandwidths even under the null, which
+   perturbs the two density estimates in a sign-varying way that `Ā`'s
+   unsigned, unweighted integral accumulates rather than cancels. `Ā` is
+   therefore a useful **descriptive** statistic that is **estimator-dependent
+   and requires full-pipeline permutation calibration — including
+   re-selecting the bandwidth inside every null replicate — before any
+   inferential use**. The signed index `B̄` is less affected by this specific
+   mechanism (its bootstrap CIs agree with the permutation verdict on all
+   twelve tested comparisons).
+
+   *A note on `A_w`.* The addendum also defines a density-weighted magnitude,
+   `A_w = ∫|S(x)| p̄(x) dx / ∫p̄(x) dx` with `p̄ = (p_A+p_B)/2`, which converges
+   exactly to the total-variation distance between the two density estimates
+   as ε→0. In the twelve tested comparisons its null medians are lower and
+   narrower than `Ā`'s (0.051–0.117 vs. 0.089–0.398), but it remains
+   bandwidth-dependent, its null baseline is still materially nonzero, and in
+   the same table it produces *fewer* Holm-significant rejections than `Ā`,
+   not more. `A_w` is a density-weighted alternative whose broader calibration
+   behavior remains open — it is not established as unbiased, more powerful,
+   or a superior replacement for `Ā`. **`A_w` is not currently implemented in
+   this repository's committed `src/` pipeline**; the values in
+   `revision_addendum/permutation_results.csv` are not reproducible from
+   `python run_all.py` alone.
 
 No network retrieval succeeded during the original analysis. Every external
 database required by the protocol (AlphaFold DB, UniProt REST, MobiDB, the
@@ -285,7 +334,14 @@ redistribution with attribution); the manuscript is covered by neither.
 
 ## Related paper
 
-The manuscript is in [`paper/manuscript.pdf`](paper/manuscript.pdf).
+The original manuscript is in [`paper/manuscript.pdf`](paper/manuscript.pdf).
+Following the permutation-calibration audit described in the revision notice
+above, one of its results-section claims was withdrawn and another reversed.
+See [`revision_addendum/`](revision_addendum/) for the current, authoritative
+account, including the revised manuscript
+(`revision_addendum/bounded-asymmetry-profiles-cross-taxon-protein-disorder-2026.pdf`)
+and the full claim-by-claim disposition table in
+`ADDENDUM_permutation_calibration.pdf`.
 
 Preprint archived on Zenodo: https://doi.org/10.5281/zenodo.21628406
 (version v8, published 2026-07-27, CC BY 4.0)
