@@ -6,25 +6,40 @@ it, and nothing in the repository depends on Zotero being present.
 
 ## 1. Status
 
+Applied 2026-09-18. The library now contains what this document specifies.
+
 | Item | State |
 |---|---|
 | `references.bib` | **complete** — 38 entries, every DOI resolved against Crossref/DataCite, entries generated from registrar metadata rather than retyped |
-| Collection tree | **specified below, not yet created** |
-| Item import, filing, tagging, notes | **specified below, not yet applied** |
+| Collection tree | **created** — parent `DisProt — Bounded Asymmetry` plus all 17 subcollections |
+| Items | **38 imported**, 0 failed, **0 duplicates**, each carrying its BibTeX citation key |
+| Filing | **104 memberships** across the 38 items; all 17 subcollection counts match the specification exactly |
+| Tags | **13 controlled tags applied**, counts matching the specification exactly; no tag outside the controlled list |
+| Notes | **9 child notes**, one per prioritised source, all six fields present in each |
+| Metadata agreement | **0 discrepancies in 38 items** against `references.bib` (citation key, title, year, DOI, first author, author count, journal, volume, pages) |
 
-The Zotero local API accepts reads without authentication but requires an API key for writes, and the
-key issued earlier had expired by the time this audit reached the import step. Re-authorisation
-(`POST /api/local/authorize`) waits on a confirmation dialog inside the Zotero desktop application,
-which was not approved during the session, so **no Zotero write was performed and no existing Zotero
-content was touched**. The six other project trees in the library
-(`EOC — Collatz Conjecture Research`, `OU Threshold — Heterogeneity and Coupling`,
-`Pell Spine — Optimal Separator`, `Signed Context Decomposition — Cosmology`,
-`Strain–Vorticity Comparator Dynamics`, `Structural Addresses Methodology` — 88 collections,
-142 items) were verified intact by read-only queries and are unaffected.
+Library after the import: **180 top-level items, 106 collections, empty trash, 37 distinct tags.**
+The six other project trees (`EOC — Collatz Conjecture Research`,
+`OU Threshold — Heterogeneity and Coupling`, `Pell Spine — Optimal Separator`,
+`Signed Context Decomposition — Cosmology`, `Strain–Vorticity Comparator Dynamics`,
+`Structural Addresses Methodology`) were verified unchanged, with their subcollection counts intact.
 
-Everything below is therefore a specification that can be applied in one pass once the dialog is
-approved. It is recorded here so the intended organisation is reviewable and reproducible
-independently of whether the import has run.
+Two notes on how this was done, for anyone repeating it:
+
+* Writes to the Zotero local API need both an API key from `POST /api/local/authorize` — which waits
+  on a confirmation dialog in the desktop application — and a `Zotero-Server-ID` header, which is
+  returned on any read. Reads need neither. The key expires, and re-authorisation needs the dialog
+  again.
+* The import ran twice by accident, because the module that performs the writes was later imported
+  for its BibTeX parser and had no `__main__` guard, so its top-level code executed a second time.
+  That produced exactly one duplicate of each of the 38 items. The duplicates were identified by
+  citation key, the earlier copy of each pair kept, and the 38 later copies deleted; the counts and
+  the metadata check above were then re-verified from the live library, and the trash is empty. If
+  you reuse the tooling, keep the write path behind a `__main__` guard.
+
+Three of the 38 items are not journal articles: `Scott1992`, `SugiyamaEtAl2012` and `LeCam1986` are
+books, so their DOIs live in the Extra field, which Zotero has no DOI field for on that item type.
+`DeJesus2026disprot` is filed as a preprint.
 
 ## 2. Collection tree
 
