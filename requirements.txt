@@ -9,6 +9,6 @@
 # changes in a future major release rather than to exclude any known-bad build.
 
 numpy>=2.0,<3
-pandas>=2.2,<3
+pandas>=2.2,<4      # <4, not <3: requirements-lock.txt pins the verified pandas==3.0.2
 scipy>=1.13,<2
 matplotlib>=3.8,<4

@@ -26,9 +26,9 @@ identifiers:
     description: >-
       Zenodo archive of the preprint and the original pre-refactor analysis
       files (version v8, published 2026-07-27). Verified to resolve on
-      2026-07-27. TODO: replace with the Zenodo concept DOI, which always
-      resolves to the latest version; it is available on the record page under
-      "Versions -> Cite all versions?".
+      2026-07-27. The corresponding Zenodo *concept* DOI, which always resolves
+      to the latest version, is 10.5281/zenodo.21613280 (confirmed from DataCite
+      metadata: this version is recorded as IsVersionOf that DOI).
 authors:
   - family-names: "De Jesús"
     given-names: "Elias"

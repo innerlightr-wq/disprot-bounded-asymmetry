@@ -41,9 +41,47 @@ annotations for **1,766 proteins** across four taxa (DisProt release 2026_06):
 > beyond scalar two-sample testing" is **reversed**: in this dataset the
 > profile's rejection set is a strict subset of the Kolmogorov–Smirnov
 > rejection set. The findings below reflect that audit. Full detail, the
-> claim-by-claim disposition, and the revised manuscript are in
-> [`revision_addendum/`](revision_addendum/), which should be read in
-> preference to `paper/manuscript.pdf` for current substantive conclusions.
+> claim-by-claim disposition are in
+> [`revision_addendum/ADDENDUM_permutation_calibration.pdf`](revision_addendum/),
+> which should be read in preference to `paper/manuscript.pdf` for current
+> substantive conclusions. **Note that neither PDF of the paper itself has yet
+> been corrected**: both still carry the withdrawn localisation claim in their
+> abstracts. The addendum is the only document that reflects the calibration.
+
+> **Literature and provenance audit (September 2026).** A Zotero-assisted
+> literature, provenance, statistical-methodology and biological-interpretation
+> audit is recorded in
+> [`docs/NOVELTY_AND_PROVENANCE.md`](docs/NOVELTY_AND_PROVENANCE.md), with 38
+> DOI-verified references in [`references.bib`](references.bib). Its four
+> headline conclusions:
+>
+> 1. **The statistic is not new, and the repository should say which standard
+>    objects it is.** `S(x)` is exactly `tanh(½ log(p_A/p_B))` at `ε = 0` — a
+>    bounded monotone transform of the density ratio. `Ā` is a regularised
+>    continuous **Canberra** distance between the two density estimates. `A_w` is
+>    **exactly the total-variation distance** at `ε = 0` (an identity, not just a
+>    limit), equivalently the continuous Bray–Curtis dissimilarity. The
+>    mass-weighted *square* of `S` is **triangular discrimination**. All four
+>    identities were verified symbolically.
+> 2. **`Ā`'s instability is structural, not bad luck.** `Ā` weights the *domain*
+>    uniformly rather than the probability mass, so it accumulates contrast from
+>    low-mass regions where `|S|` is noisiest — which is why empty bins drive
+>    `|S| → 1` and why unequal-`n` bandwidths inflate its null. Relatedly,
+>    `A_w = Ā + Cov_U(|S|, p̄)` exactly, so `A_w < Ā` precisely when the contrast
+>    sits where the mass is not, and `A_w ≈ Ā` whenever `p̄` is near-uniform —
+>    which is why the synthetic audit found little benefit for bimodal shapes.
+> 3. **The reversal against KS is robust.** Under a matched per-feature Holm
+>    correction, `Ā` rejects 5 comparisons and KS rejects 6, with `Ā`'s set a
+>    strict subset. Every repository number reproduced (11 of 13 CSVs
+>    byte-identical; the rest to ≤ 9e-16).
+> 4. **The biological negative result is stronger than stated.** Beyond
+>    ρ = 0.07–0.24, the very-low-confidence fraction is *range-compressed*: across
+>    a 53-fold span of curated disorder its median moves only within 0.12–0.28,
+>    and 77 proteins annotated disordered end-to-end have a median proxy value
+>    (0.148) indistinguishable from the 375 proteins with almost no annotated
+>    disorder (0.160). This is a protein-level calibration failure and says
+>    nothing against residue-level pLDDT disorder prediction, where the published
+>    CAID benchmarks are good.
 
 The report's current findings, after the revision addendum above:
 
@@ -94,8 +132,14 @@ The report's current findings, after the revision addendum above:
    as ε→0. In the twelve tested comparisons its null medians are lower and
    narrower than `Ā`'s (0.051–0.117 vs. 0.089–0.398), but it remains
    bandwidth-dependent, its null baseline is still materially nonzero, and in
-   the same table it produces *fewer* Holm-significant rejections than `Ā`,
-   not more. `A_w` is a density-weighted alternative whose broader calibration
+   the same table it rejects **exactly the same five comparisons** as `Ā` under
+   Holm correction — it buys no additional rejection, and at uncorrected
+   α = 0.05 it rejects one *more* (six vs. five), not fewer. (An earlier version
+   of this note said it produced *fewer* Holm-significant rejections; that was
+   wrong, and the September 2026 audit recomputed the rejection sets from
+   `revision_addendum/permutation_results.csv` to establish it. See §15.1 of
+   [`docs/NOVELTY_AND_PROVENANCE.md`](docs/NOVELTY_AND_PROVENANCE.md).)
+   `A_w` is a density-weighted alternative whose broader calibration
    behavior remains open — it is not established as unbiased, more powerful,
    or a superior replacement for `Ā`. **`A_w` is not currently implemented in
    this repository's committed `src/` pipeline**; the values in
@@ -140,13 +184,21 @@ being silently omitted, and they bound what the study can claim — see
 │   ├── 03_figures.py           Figures 1–6
 │   ├── 04_retrieval_log.py     retrieval-failure manifest; unavailable accessions
 │   ├── 05_dphi_test.py         composite-operator diagnostic (not a manuscript result)
-│   └── 06_fig4_column.py       Figure 4 re-emitted at single-column width
+│   ├── 06_fig4_column.py       Figure 4 re-emitted at single-column width
+│   └── 07_null_calibration_grid.py
+│                               synthetic null-calibration audit of Ā vs A_w;
+│                               statistical diagnostic only, NOT part of run_all.py
+│
+├── tests/
+│   └── test_null_calibration_grid.py
+│                               19 tests covering src/07 only
 │
 ├── results/
 │   ├── README.md               output-to-manuscript map; verification record
 │   ├── tables/                 protein/region tables and manuscript table sources
 │   ├── diagnostics/            audit, robustness, calibration and retrieval CSVs
 │   ├── figures/                Figures 1–6 as PDF and PNG
+│   ├── null_calibration/       outputs + README for the src/07 synthetic audit
 │   └── deposited_originals/    archival copies from the earlier deposit — DO NOT EDIT
 │
 ├── paper/
@@ -159,13 +211,19 @@ being silently omitted, and they bound what the study can claim — see
     └── bounded-asymmetry-profiles-cross-taxon-protein-disorder-2026.pdf
 ```
 
-Two notes on this layout:
+Three notes on this layout:
 
 - **`results/deposited_originals/` is not pipeline output.** It holds three
   files from the earlier archival deposit that the archived scripts cannot
   reproduce, preserved unchanged as historical record. `results/README.md`
   documents the differences in full. Nothing in the pipeline writes to that
   directory.
+- **`src/07_null_calibration_grid.py` is not run by `run_all.py`.** It is a
+  self-contained statistical diagnostic that uses no DisProt data and produces no
+  manuscript number, so it is deliberately outside the manuscript pipeline; run it
+  directly (or set `DISPROT_NULLCAL_OUT`) if you want to regenerate
+  `results/null_calibration/`. Note also that `tests/` covers only this module:
+  `src/01`–`src/06`, which produce every table and figure, have no tests.
 - `alphafold_retrieval_manifest.csv` lives in `results/diagnostics/` rather
   than `data/metadata/`, because it is generated by `04_retrieval_log.py` on
   every run. Keeping a second copy under `data/` would let the two drift apart.
@@ -311,6 +369,7 @@ including the three archived files the scripts cannot reproduce, is in
 | §3.4 estimator sensitivity | `results/diagnostics/robustness_sensitivity.csv`, `results/diagnostics/sign_stability.csv` | `02_asymmetry.py` |
 | §2.3 audit / integrity claims | `results/diagnostics/source_file_audit.csv`, `results/diagnostics/phase1_integrity_checks.csv` | `01_build_tables.py` |
 | §2.4 retrieval failures | `results/diagnostics/alphafold_retrieval_manifest.csv`, `results/diagnostics/failed_accessions.csv` | `04_retrieval_log.py` |
+| *(no manuscript item)* synthetic null calibration of `Ā` vs `A_w` | `results/null_calibration/*.csv` | `07_null_calibration_grid.py`, run separately |
 
 **Note on figure numbering.** Script filenames do not match manuscript figure
 numbers. The manuscript has five figures in its body; the scripts emit six
@@ -337,19 +396,32 @@ redistribution with attribution); the manuscript is covered by neither.
 The original manuscript is in [`paper/manuscript.pdf`](paper/manuscript.pdf).
 Following the permutation-calibration audit described in the revision notice
 above, one of its results-section claims was withdrawn and another reversed.
-See [`revision_addendum/`](revision_addendum/) for the current, authoritative
-account, including the revised manuscript
-(`revision_addendum/bounded-asymmetry-profiles-cross-taxon-protein-disorder-2026.pdf`)
-and the full claim-by-claim disposition table in
-`ADDENDUM_permutation_calibration.pdf`.
+The current, authoritative account is
+`revision_addendum/ADDENDUM_permutation_calibration.pdf`, whose §5 carries the
+full claim-by-claim disposition table.
 
-Preprint archived on Zenodo: https://doi.org/10.5281/zenodo.21628406
-(version v8, published 2026-07-27, CC BY 4.0)
+**`revision_addendum/bounded-asymmetry-profiles-cross-taxon-protein-disorder-2026.pdf`
+is not a corrected manuscript.** It was previously described here as "the revised
+manuscript incorporating the additional statistical calibration"; it is not. A
+text comparison against `paper/manuscript.pdf` differs only in reference
+line-wrapping and one Zenodo DOI, the word "permutation" does not appear in it,
+and its abstract still states that the profile "resolves localised structure" in
+the human–*E. coli* comparison — the claim the addendum withdraws. It is
+retained here as the deposited record of that version, not as a correction. A
+manuscript version whose abstract matches the addendum has still to be prepared;
+see §15.2 and §20 of
+[`docs/NOVELTY_AND_PROVENANCE.md`](docs/NOVELTY_AND_PROVENANCE.md).
 
-*TODO: replace the line above with the Zenodo **concept DOI**, which always
-resolves to the latest version. Read it off the record page under
-"Versions -> Cite all versions?". The version DOI above will go stale the next
-time a new version is uploaded.*
+Preprint archived on Zenodo:
+
+- **Concept DOI (always resolves to the latest version):**
+  https://doi.org/10.5281/zenodo.21613280
+- **This version (v8, published 2026-07-27, CC BY 4.0):**
+  https://doi.org/10.5281/zenodo.21628406
+
+The concept DOI was confirmed from DataCite metadata, which records
+`10.5281/zenodo.21628406` as `IsVersionOf` `10.5281/zenodo.21613280`; prefer the
+concept DOI in citations, since the version DOI goes stale on each new upload.
 
 **The Zenodo record and this repository are not the same artifact.** The
 Zenodo deposit carries the preprint PDF together with the original,

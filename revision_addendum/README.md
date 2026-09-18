@@ -14,7 +14,7 @@ Machine-readable output from the permutation calibration analysis used in the ad
 
 ### `bounded-asymmetry-profiles-cross-taxon-protein-disorder-2026.pdf`
 
-The revised manuscript incorporating the additional statistical calibration and related clarifications.
+The deposited manuscript version that accompanied this addendum. **It is not a corrected manuscript.** Its text is substantively identical to `paper/manuscript.pdf` — a normalised text comparison differs only in reference line-wrapping and one Zenodo DOI — the word "permutation" does not appear in it, and its abstract still asserts the localisation claim that Section 5 of the addendum withdraws. Read `ADDENDUM_permutation_calibration.pdf` for the current conclusions. (Corrected 2026-09-18; this file previously described the PDF as "the revised manuscript incorporating the additional statistical calibration".)
 
 ## Purpose
 
