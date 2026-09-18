@@ -10,15 +10,15 @@ Applied 2026-09-18. The library now contains what this document specifies.
 
 | Item | State |
 |---|---|
-| `references.bib` | **complete** — 38 entries, every DOI resolved against Crossref/DataCite, entries generated from registrar metadata rather than retyped |
+| `references.bib` | **complete** — 39 entries, every DOI resolved against Crossref/DataCite, entries generated from registrar metadata rather than retyped |
 | Collection tree | **created** — parent `DisProt — Bounded Asymmetry` plus all 17 subcollections |
-| Items | **38 imported**, 0 failed, **0 duplicates**, each carrying its BibTeX citation key |
-| Filing | **104 memberships** across the 38 items; all 17 subcollection counts match the specification exactly |
+| Items | **39 imported** (38 in the first pass, `Alderson2023` added by the AlphaFold-proxy audit), 0 failed, **0 duplicates**, each carrying its BibTeX citation key |
+| Filing | **108 memberships** across the 39 items; all 17 subcollection counts match the specification exactly |
 | Tags | **13 controlled tags applied**, counts matching the specification exactly; no tag outside the controlled list |
-| Notes | **9 child notes**, one per prioritised source, all six fields present in each |
-| Metadata agreement | **0 discrepancies in 38 items** against `references.bib` (citation key, title, year, DOI, first author, author count, journal, volume, pages) |
+| Notes | **10 child notes** (9 from the first pass plus `Alderson2023`), all six fields present in each |
+| Metadata agreement | **0 discrepancies in 38 items** (first pass) against `references.bib` (citation key, title, year, DOI, first author, author count, journal, volume, pages) |
 
-Library after the import: **180 top-level items, 106 collections, empty trash, 37 distinct tags.**
+Library after the import: **181 top-level items, 106 collections, empty trash, 37 distinct tags.**
 The six other project trees (`EOC — Collatz Conjecture Research`,
 `OU Threshold — Heterogeneity and Coupling`, `Pell Spine — Optimal Separator`,
 `Signed Context Decomposition — Cosmology`, `Strain–Vorticity Comparator Dynamics`,
@@ -51,7 +51,7 @@ list has no placeholders.
 |---|---|
 | `00 — Reviews & Orientation` | 2 |
 | `01 — DisProt & Intrinsic Disorder` | 4 |
-| `02 — AlphaFold Confidence & pLDDT` | 6 |
+| `02 — AlphaFold Confidence & pLDDT` | 7 |
 | `03 — Disorder Prediction Benchmarks` | 6 |
 | `04 — CAID & MobiDB` | 4 |
 | `05 — Density Estimation / KDE` | 3 |
@@ -62,10 +62,10 @@ list has no placeholders.
 | `10 — Permutation Calibration` | 2 |
 | `11 — Unequal Sample Size / Bandwidth Effects` | 3 |
 | `12 — Taxonomic Disorder Variation` | 3 |
-| `13 — Proxy Validation & Calibration` | 3 |
+| `13 — Proxy Validation & Calibration` | 4 |
 | `14 — Negative Results / Method Evaluation` | 2 |
-| `15 — Directly Cited in Repository` | **38** |
-| `16 — Closest Prior Art / Novelty Checks` | 10 |
+| `15 — Directly Cited in Repository` | **39** |
+| `16 — Closest Prior Art / Novelty Checks` | 11 |
 
 104 memberships across 38 distinct items: an item appears in several subcollections because the
 subcollections record the *role* a source plays in the argument, not a partition of the bibliography.
@@ -83,7 +83,7 @@ novelty questions the audit had to answer:
 | relative density-ratio / density-difference methods | `SugiyamaEtAl2012`, `SugiyamaEtAl2013` |
 | KDE two-sample discrepancy statistics | `AndersonHallTitterington1994` |
 | localised two-sample / witness methods | `Duong2013`, `Gretton2012` |
-| AlphaFold–disorder benchmarking | `PiovesanEtAl2022`, `Necci2021` |
+| AlphaFold–disorder benchmarking | `PiovesanEtAl2022`, `Necci2021`, `Alderson2023` |
 
 ## 3. Controlled tags
 
@@ -91,12 +91,12 @@ Thirteen of the fifteen controlled tags are used. Counts:
 
 | Tag | Items |
 |---|---|
-| `directly-cited` | 38 |
+| `directly-cited` | 39 |
 | `disorder-biology` | 14 |
 | `classical-statistics` | 11 |
-| `closest-prior-art` | 10 |
-| `alphafold-context` | 6 |
-| `proxy-validation` | 6 |
+| `closest-prior-art` | 11 |
+| `alphafold-context` | 7 |
+| `proxy-validation` | 7 |
 | `kde-methodology` | 5 |
 | `known-reparameterized` | 5 |
 | `two-sample-testing` | 5 |

@@ -92,3 +92,31 @@ et al. (2021), https://doi.org/10.1038/s41586-021-03819-2, and Varadi et al.
 The pipeline depends on NumPy, pandas, SciPy and matplotlib, each distributed
 under its own permissive licence (BSD-3-Clause or equivalent). Those licences
 apply to those packages, not to this repository.
+
+---
+
+## AlphaFold validation data (added 2026-09-18)
+
+The September 2026 validation audit downloaded per-residue confidence files from the AlphaFold
+Protein Structure Database (`https://alphafold.ebi.ac.uk/files/AF-<acc>-F1-confidence_v6.json`) for
+1,661 accessions, to verify what DisProt's `alphafold_very_low_content` field contains.
+
+**Those files are not redistributed in this repository.** What is committed is:
+
+* `data/alphafold_validation_manifest.csv` — one row per accession: source URL, retrieval timestamp,
+  model version, sequence and model lengths, the **SHA-256 of the downloaded file**, and mapping
+  status;
+* `results/alphafold_validation/proxy_validation.csv` — the derived per-protein scalars (fractions
+  below the confidence thresholds, mean and median pLDDT, coverage);
+* `analysis/validate_alphafold_proxy.py` — the script that regenerates both from the accession list.
+
+That combination reproduces the analysis without republishing third-party structure data. The
+downloads are cached outside the repository (`--cache-dir`, default `/tmp/af_cache`, about 16 MB for
+the full set).
+
+This choice is deliberately conservative and does not depend on how AlphaFold DB is licensed. **If
+you intend to redistribute the confidence files themselves, check the current licence terms on the
+AlphaFold DB site first** — they were not verified here, because nothing in this repository requires
+redistribution. Note also that AlphaFold DB serves only the current model version (`v6` at the time
+of writing; `v1`–`v5` return HTTP 404), so a reconstruction run later may differ slightly from the
+committed values; the manifest records the version and hash actually used.

@@ -74,24 +74,58 @@ annotations for **1,766 proteins** across four taxa (DisProt release 2026_06):
 >    correction, `Ā` rejects 5 comparisons and KS rejects 6, with `Ā`'s set a
 >    strict subset. Every repository number reproduced (11 of 13 CSVs
 >    byte-identical; the rest to ≤ 9e-16).
-> 4. **The biological negative result is stronger than stated.** Beyond
->    ρ = 0.07–0.24, the very-low-confidence fraction is *range-compressed*: across
->    a 53-fold span of curated disorder its median moves only within 0.12–0.28,
->    and 77 proteins annotated disordered end-to-end have a median proxy value
->    (0.148) indistinguishable from the 375 proteins with almost no annotated
->    disorder (0.160). This is a protein-level calibration failure and says
->    nothing against residue-level pLDDT disorder prediction, where the published
->    CAID benchmarks are good.
+> 4. **The biological result needed re-examination, and a second audit revised
+>    it.** A follow-up validation (September 2026) confirmed from raw AlphaFold
+>    data that `alphafold_very_low_content` really is the fraction of residues
+>    with pLDDT < 50 — but found that **protein length confounds the
+>    protein-level comparison**, and withdrew two claims made in the first audit.
+>    See *AlphaFold proxy provenance* below.
+
+> **AlphaFold proxy provenance (September 2026 validation).** A second audit
+> settled what `alphafold_very_low_content` is, using raw residue-level pLDDT
+> that no earlier run could reach. Full detail in §23–§31 of
+> [`docs/NOVELTY_AND_PROVENANCE.md`](docs/NOVELTY_AND_PROVENANCE.md);
+> reconstruction script in
+> [`analysis/validate_alphafold_proxy.py`](analysis/validate_alphafold_proxy.py).
+>
+> * **The field is what its name says.** It is `count(pLDDT < 50) / n_residues`,
+>   copied verbatim from the DisProt export — this repository computes nothing.
+>   Reconstructed independently for **1,661 of 1,662** proteins from AlphaFold DB:
+>   Spearman 0.9937, Pearson 0.9960, median absolute difference 0.0047, mean
+>   difference −0.0011, coverage exactly 1.0 for every protein. Residual scatter
+>   is AlphaFold model-version drift (only `v6` is still served). "Very low" = 
+>   `pLDDT < 50` was read off the provider's own `confidenceCategory` array.
+> * **Two claims from the first audit are withdrawn.** Protein length is
+>   negatively associated with the curated fraction (ρ = −0.40) and positively
+>   with the low-confidence fraction (ρ = +0.41), so it *suppresses* the
+>   correlation and made two incomparable groups look alike. The
+>   "fully-disordered vs almost-no-disorder" comparison reverses from AUROC 0.48
+>   to **0.81** under length matching, and the "range compression" claim fails
+>   outright (IQR ratio 1.05). See §31.
+> * **The failure is specific to the `< 50` band.** At AlphaFold's other
+>   published edge, `pLDDT < 70`, the same comparison reaches AUROC 0.76 without
+>   length matching and 0.92 with it. Whole-protein aggregation is not the
+>   problem; the very-low band alone is too strict.
+> * **DisProt annotates a median of 12.7% of each sequence**, with 2,694
+>   disorder segments and only 4 structured segments in the whole dataset. So
+>   the 375 low-annotation proteins are **not** ordered proteins, and the curated
+>   fraction is a per-protein lower bound of varying tightness.
+> * **What stands:** the field is not a one-to-one estimator (slope 0.11, MAE
+>   0.20), taxon offsets persist with length controlled, and residue-level signal
+>   is strong (AUROC 0.78) while protein-level agreement is moderate — consistent
+>   with, not contradicting, the CAID benchmarks.
 
 The report's current findings, after the revision addendum above:
 
-1. **The AlphaFold-derived very-low-confidence fraction is a poor
-   protein-level proxy for curated disorder** in every taxon examined
-   (Spearman ρ = 0.07–0.24), and its offset relative to curated disorder is
-   taxon-dependent (median signed gap +0.001 human vs. −0.083 *E. coli*,
-   Mann–Whitney *p* < 10⁻⁴). This is the study's gating result and its
-   strongest retained finding: it is reported even though it blocks the
-   intended downstream application.
+1. **The AlphaFold-derived very-low-confidence fraction is a correlated but
+   poorly calibrated protein-level index of curated disorder**, with a
+   taxon-dependent offset (median signed gap +0.001 human vs. −0.083
+   *E. coli*, Mann–Whitney *p* < 10⁻⁴). This is the study's gating result: it
+   is reported even though it blocks the intended downstream application.
+   **Read this together with the validation audit below**, which confirmed the
+   field's definition against raw pLDDT but showed that the pooled Spearman
+   ρ = 0.07–0.24 is suppressed by protein length (ρ = 0.32 with length held
+   constant) and that the wording "poor proxy" overstates the case.
 2. **The bounded asymmetry profile is a descriptive instrument, not
    currently an inferential one.** For human vs. *E. coli* curated disorder it
    produces `Ā = 0.143`, `C = 0.57`, and two zero crossings in a comparison
@@ -175,8 +209,10 @@ being silently omitted, and they bound what the study can claim — see
 │   │   ├── disprot_taxon_559292_saccharomyces_cerevisiae.json
 │   │   ├── disprot_taxon_83333_escherichia_coli_k12.json
 │   │   └── disprot_taxon_6239_caenorhabditis_elegans.json
-│   └── metadata/
-│       └── source_queries.csv  per-file provenance: taxon, counts, MD5, SHA-256
+│   ├── metadata/
+│   │   └── source_queries.csv  per-file provenance: taxon, counts, MD5, SHA-256
+│   └── alphafold_validation_manifest.csv
+│                               per-accession AlphaFold download provenance + SHA-256
 │
 ├── src/
 │   ├── 01_build_tables.py      audit inputs; build protein- and region-level tables
@@ -189,9 +225,16 @@ being silently omitted, and they bound what the study can claim — see
 │                               synthetic null-calibration audit of Ā vs A_w;
 │                               statistical diagnostic only, NOT part of run_all.py
 │
+├── analysis/
+│   └── validate_alphafold_proxy.py
+│                               reconstructs the pLDDT<50 fraction from AlphaFold DB
+│                               and compares it with the stored DisProt field
+│
 ├── tests/
-│   └── test_null_calibration_grid.py
-│                               19 tests covering src/07 only
+│   ├── test_null_calibration_grid.py
+│   │                           19 tests covering src/07
+│   └── test_alphafold_validation.py
+│                               13 tests covering analysis/, no network
 │
 ├── results/
 │   ├── README.md               output-to-manuscript map; verification record
@@ -199,6 +242,7 @@ being silently omitted, and they bound what the study can claim — see
 │   ├── diagnostics/            audit, robustness, calibration and retrieval CSVs
 │   ├── figures/                Figures 1–6 as PDF and PNG
 │   ├── null_calibration/       outputs + README for the src/07 synthetic audit
+│   ├── alphafold_validation/   stored-vs-reconstructed pLDDT<50 comparison
 │   └── deposited_originals/    archival copies from the earlier deposit — DO NOT EDIT
 │
 ├── paper/

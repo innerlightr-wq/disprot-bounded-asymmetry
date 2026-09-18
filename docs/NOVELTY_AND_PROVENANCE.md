@@ -214,6 +214,24 @@ that were left OPEN there:
   reduction for bimodal densities" is therefore not a puzzle and not a failure of `A_w` — it is the
   identity evaluated at `Cov_U ≈ 0`.
 
+**Exact conditions** (re-derived and re-checked 2026-09-18). Writing `U` for the uniform measure on
+the domain `Ω` and `E` for expectation under it, the general form is
+
+```
+A_w = Ā + |Ω| · Cov_U(|S|, p̄)        whenever  ∫_Ω p_A = ∫_Ω p_B = 1
+```
+
+The identity requires exactly two things: both density estimates integrate to 1 over `Ω` (which the
+pipeline enforces by dividing each KDE by its own trapezoidal integral), and `Ā` is defined with the
+domain-normalised measure `∫|S|dx / |Ω|` (which `src/02_asymmetry.py` does). On this repository's unit
+domain `|Ω| = 1` and `E_U[p̄] = 1` exactly, so it reduces to `A_w = Ā + Cov_U(|S|, p̄)`.
+
+It does **not** require `ε = 0`: `S` enters only through `|S|`, whatever regularisation produced it.
+Verified numerically for the Human–Bacterial `D_exp` pair at `ε = 0, 1e-6, 1e-3, 1e-2, 1e-1`, with
+residuals of at most `1.4e-17` at every value, and across all twelve real comparisons at the
+production `ε = 1e-3` (residual ≤ `1.1e-16`). The total-variation identity of §5, by contrast, *does*
+require `ε = 0`, and was re-confirmed for the same pair: `A_w(0) = 0.0857335688 = ½∫|p_A − p_B|`.
+
 `Classification: ELEMENTARY CONSEQUENCE.` It should be stated as a one-line algebraic remark, never
 as a theorem.
 
@@ -762,3 +780,330 @@ prior-art citations from `references.bib`; (4) retrieve residue-level pLDDT to s
   §8.1 are the standard ones named in the brief, and the only new quantities computed were the decile
   calibration of §12.1 and the Holm/KS rejection sets of §8.2 — both diagnostics of existing claims,
   neither a replacement statistic.
+
+---
+
+# ALPHAFOLD PROXY PROVENANCE
+
+Added 2026-09-18, after a dedicated validation audit. **This section corrects §12.1 above.** The
+range-compression claim made there does not survive, and the reason is a protein-length confound.
+The claims withdrawn are named explicitly in §31.
+
+## 23. What `alphafold_very_low_content` actually is
+
+**Verdict A — exact direct fraction.** It is the fraction of residues whose AlphaFold pLDDT is
+below 50, with the number of modelled residues as denominator.
+
+### 23.1 Provenance chain
+
+| Step | Where | What happens |
+|---|---|---|
+| final CSV column `af_very_low_content` | `results/tables/disprot_protein_level.csv` | written by `01_build_tables.py` |
+| transformation | `src/01_build_tables.py:162` | `pd.to_numeric(..., errors="coerce")` — **type coercion only** |
+| assignment | `src/01_build_tables.py:108,127` | `af = r.get("alphafold_very_low_content")` — copied verbatim |
+| input field | `data/raw/disprot_taxon_*.json` | DisProt record key `alphafold_very_low_content` |
+| provider | **DisProt** release 2026_06, "with ambiguous evidences" per-organism JSON export | a DisProt-computed field, not an AlphaFold DB field |
+| upstream quantity | AlphaFold DB per-residue pLDDT | not present anywhere in this repository |
+
+**The repository performs no calculation on this field at all** — no threshold, no denominator, no
+rescaling. Its semantics are entirely DisProt's, and the repository was right to call its own reading
+"unverified". Two further provenance facts:
+
+* the field is **absent from DisProt's single-record API** (`/api/DP00086` has no such key) and
+  present only in the search/export endpoint, i.e. it is an export-layer annotation;
+* **DisProt does not document it.** Its `/about`, `/help` and `/statistics` pages and its API return
+  no definition, so the name is the only provider-side documentation available. This is why the
+  question had to be settled empirically.
+
+### 23.2 The export is reproducible
+
+Re-downloading the *E. coli* export today from
+`https://disprot.org/api/search?release=current&show_ambiguous=true&show_obsolete=false&format=json&ncbi_taxon_id=83333`
+yields a file whose **MD5 is `df0b07151610e12043d687362cb935c2` — identical to the committed
+`data/raw/disprot_taxon_83333_escherichia_coli_k12.json`** and to the hash recorded in
+`data/metadata/source_queries.csv`. The export is stable and the committed data are faithful.
+
+### 23.3 The denominator (step 10 of the brief)
+
+Settled two ways, and they agree:
+
+1. **Arithmetically.** For **1652 of 1662** records the stored value times DisProt's `length` is an
+   integer to 1e-6 — so the denominator is the full sequence length, not a sub-count.
+2. **Empirically.** For all **1661** proteins whose AlphaFold model was retrieved, the number of
+   modelled residues equals DisProt's `length` exactly: **coverage = 1.000 for every protein**.
+
+So options A, B and C of the brief coincide here: full sequence length = modelled residues = mapped
+residues. There is no denominator mismatch, and denominator mismatch is **not** the explanation for
+anything.
+
+### 23.4 The threshold is 50, read off the provider's own data
+
+AlphaFold DB's confidence files carry a `confidenceCategory` array alongside the scores. Reading the
+band edges directly out of that array rather than from memory:
+
+| Category | pLDDT range observed | Meaning |
+|---|---|---|
+| `D` | 32.78 – 49.97 | very low |
+| `L` | 50.19 – 68.81 | low |
+| `M` | 70.00 – 89.19 | confident |
+| `H` | 90.00 – 98.69 | very high |
+
+And across all 1661 reconstructions, the fraction of category-`D` residues equals the fraction with
+pLDDT < 50 **exactly** (max difference 0.00e+00). So "very low" is `pLDDT < 50`, on the provider's own
+definition.
+
+### 23.5 Stored versus directly reconstructed (step 11)
+
+Reconstruction is by `analysis/validate_alphafold_proxy.py`, which fetches
+`AF-<acc>-F1-confidence_v6.json` from AlphaFold DB and counts residues below the threshold.
+
+| Quantity | Value |
+|---|---|
+| proteins with a stored value | 1662 |
+| AlphaFold models retrieved | **1661** (1 failure: `O43236-1`, an isoform accession with no AlphaFold entry) |
+| coverage = 1.0 | 1661 / 1661 |
+| Spearman(stored, reconstructed f50) | **0.9937** |
+| Pearson | **0.9960** |
+| median \|stored − f50\| | **0.0047** |
+| mean (stored − f50) | **−0.0011** |
+| median stored / f50 | **1.0000** |
+| exact matches (< 1e-9) | 335 |
+| agreement within 0.01 | 1184 / 1661 |
+| agreement within 0.05 | 1611 / 1661 |
+| max \|stored − f50\| | 0.1418 |
+
+The residual scatter is **AlphaFold model-version drift**, not a semantic difference: DisProt computed
+its value against an earlier AlphaFold release, and AlphaFold DB now serves only `v6` (v1–v5 return
+404), so the historical values cannot be re-fetched. The 335 exact matches are the entries whose
+models have not changed. Nothing about the scatter is systematic — the mean difference is −0.001 and
+the median ratio is exactly 1.
+
+**Conclusion.** `alphafold_very_low_content` = `count(pLDDT < 50) / n_residues`. The repository's
+reading of the field was correct. Verdict **A**, with the model-version caveat recorded.
+
+## 24. The biological finding does not survive as previously stated
+
+### 24.1 Protein length is a strong confounder, acting in opposite directions
+
+| Association | Spearman |
+|---|---|
+| length vs curated disorder fraction `D` | **−0.396** |
+| length vs low-pLDDT fraction `f50` | **+0.414** |
+| `D` vs `f50` (pooled — the published figure) | **+0.104** |
+| `D` vs `f50`, **partialling out length** | **+0.321** |
+
+Short DisProt entries have a high annotated fraction; long proteins have more low-confidence
+residues. The two associations pull in opposite directions and **suppress** the correlation. Within
+length bands the association is far stronger than the pooled figure: ρ = 0.45 (150–300 aa),
+0.40 (300–500), 0.27 (500–800).
+
+The published ρ = 0.07–0.24 values are arithmetically correct. Their interpretation as "a poor
+surrogate" was not: a large part of the weakness is a length-suppression artefact.
+
+### 24.2 The extreme-group comparison reverses under length matching
+
+The two groups were never comparable. Median length is **136 aa** in the fully-annotated-disordered
+group and **676 aa** in the near-zero group; 43 of 77 of the first group are under 150 aa and **none**
+of the 375 in the second is under 207 aa.
+
+| Comparison (reconstructed `f50`) | n | medians | AUROC | Cliff's δ | p |
+|---|---|---|---|---|---|
+| pooled — as previously reported | 77 / 375 | 0.153 vs 0.164 | **0.479** | −0.041 | 0.57 |
+| **length-matched, 207–929 aa** | 24 / 265 | **0.426 vs 0.127** | **0.810** | **+0.620** | 5.0e-07 |
+| length-matched, human only | 17 / 199 | 0.483 vs 0.164 | 0.781 | +0.561 | 1.2e-04 |
+
+Within the fully-disordered group the low-pLDDT fraction tracks length strongly
+(Spearman **+0.747**): median `f50` is 0.031 below 100 aa, 0.144 at 100–200 aa, 0.285 at 200–400 aa
+and **0.640** at 400–1000 aa. The previous "the proxy cannot separate the extremes" conclusion was an
+artefact of comparing a short-peptide-dominated group against a long-protein group.
+
+The biology of the short-protein failure is known: AlphaFold2 assigns confident predictions to many
+genuinely disordered regions that fold **conditionally** — on binding or in context
+(`Alderson2023`). A confident model over a short disordered peptide is an expected outcome, not a
+prediction error.
+
+### 24.3 Range compression is not supported
+
+| Set | statistic | IQR(P)/IQR(D) | interdecile ratio |
+|---|---|---|---|
+| all 1661 | `f50` | **1.046** | 0.809 |
+| length ≥ 300 aa | `f50` | 1.640 | 1.165 |
+| all 1661 | `f70` | 1.401 | 1.054 |
+| length ≥ 300 aa | `f70` | 2.016 | 1.397 |
+
+The proxy's spread is **as large as or larger than** the curated fraction's. It is not compressed into
+a narrow band. The earlier appearance of compression came from a decile table of `D` whose bins are
+effectively a length gradient — median length falls from **882 aa** in the lowest-disorder decile to
+**228 aa** in the highest.
+
+### 24.4 The failure is specific to the `< 50` threshold
+
+A pre-specified robustness check at AlphaFold DB's other published band edge:
+
+| Statistic | Spearman with `D` | pooled extreme-group AUROC | length-matched AUROC |
+|---|---|---|---|
+| `f50` (pLDDT < 50) | +0.104 | 0.479 | 0.810 |
+| **`f70` (pLDDT < 70)** | **+0.315** | **0.757** | **0.924** |
+| mean pLDDT (exploratory) | −0.257 | — | — |
+| median pLDDT (exploratory) | −0.246 | — | — |
+
+So the problem is **not** whole-protein aggregation as such. Aggregating at the "low confidence"
+boundary (< 70, i.e. categories `D` + `L`) discriminates the extremes well even without length
+matching. The very-low band alone is simply too strict to capture disorder that AlphaFold models with
+moderate confidence. The `f70` figures are a robustness check at a documented band edge, not a tuned
+threshold, and the mean/median pLDDT rows are marked exploratory.
+
+### 24.5 What does not change: it is not a calibrated estimator
+
+| Metric (all 1661) | `f50` | `f70` |
+|---|---|---|
+| descriptive slope of P on D | **+0.110** | +0.368 |
+| slope, length ≥ 300 aa | +0.326 | — |
+| MAE \|P − D\| | 0.201 | 0.201 |
+| median absolute deviation | 0.119 | 0.123 |
+| median signed (P − D) | −0.011 | +0.061 |
+
+A slope far below 1 with MAE ≈ 0.20 means the low-pLDDT fraction is **not** a one-to-one estimator of
+curated disorder content, even where it correlates. That part of the repository's conclusion stands.
+
+### 24.6 Taxon offsets survive, attenuated
+
+Restricted to 300–800 aa, which removes the taxon/length mix (median length 266 aa bacterial vs
+508 aa nematode):
+
+| Taxon | n | median `D` | median `f50` | median gap | ρ |
+|---|---|---|---|---|---|
+| Human | 624 | 0.110 | 0.186 | **+0.017** | +0.280 |
+| Fungal | 97 | 0.146 | 0.180 | −0.018 | +0.460 |
+| Bacterial | 59 | 0.078 | **0.025** | **−0.038** | +0.223 |
+| Nematode | 30 | 0.097 | 0.132 | −0.007 | +0.418 |
+
+The human-versus-bacterial offset difference narrows from 0.084 (pooled) to 0.055 but does not vanish.
+Bacterial proteins receive markedly fewer very-low-confidence residues at comparable curated disorder.
+**Taxon-dependent offsets are retained as a finding**, with length controlled.
+
+## 25. Residue-level control, and why DisProt limits it
+
+Across 626 proteins with cached models, mapping DisProt's `Structural state` type-`D` segments onto
+the pLDDT array:
+
+| Residue class | n | median pLDDT | fraction < 50 | fraction < 70 |
+|---|---|---|---|---|
+| annotated disordered | 57,866 | **48.4** | 0.524 | 0.720 |
+| not annotated | 265,117 | **90.9** | 0.169 | 0.235 |
+
+AUROC for low pLDDT marking an annotated-disordered residue: **0.784**.
+
+**This is not a clean benchmark and must not be reported as one.** DisProt's annotation covers a
+median of only **12.7%** of each protein; across the whole dataset there are **2,694 disorder
+segments and only 4 structured segments**, and just 84 of 1766 proteins are fully covered. The
+negative class above is therefore *unassessed residues*, not experimentally ordered ones, so the
+figure is a descriptive contrast, not a validation. Its direction is nonetheless clear and consistent
+with the CAID literature (`Necci2021`, `DelConte2023`, `Mehdiabadi2025`): **residue-level signal is
+strong while protein-level fraction agreement is moderate at best.**
+
+## 26. The two extreme groups, as they actually are
+
+**Both group definitions were introduced by the September 2026 audit, not by the repository's code or
+manuscript**, and both need restating.
+
+* **The "77 fully disordered" group** is `D_exp >= 1.0`, i.e. every residue of the DisProt length is
+  covered by a type-`D` consensus segment. That is a genuine full-length disorder annotation, but the
+  group is dominated by short entries (median 136 aa, minimum 24 aa) and includes classic short
+  disordered peptides such as P62328 (thymosin β-4, 44 aa) which AlphaFold models confidently. It
+  should be described as *"proteins whose entire annotated length is curated as disordered, mostly
+  short"*.
+* **The "375 almost no disorder" group** is `D_exp < 0.05`. These are **not ordered proteins.** They
+  are long proteins (median 676 aa) carrying a small amount of disorder annotation — median 2
+  annotated regions and 17 annotated residues. Given 12.7% median annotation coverage, most of their
+  sequence is simply unassessed. They must be described as *"proteins with little curated disorder
+  annotation"*, never as ordered.
+
+This is the deeper problem with the whole protein-level calibration framing: `D_exp` divides annotated
+disordered residues by the **full** length, so it is a lower bound on disorder whose tightness varies
+per protein — and it varies **with length**, which is exactly the confounder of §24.1.
+
+## 27. Missing values, and one counting correction
+
+| Fact | Value |
+|---|---|
+| proteins with no usable proxy value | **104**, not 103 |
+| of which JSON `null` | 103 |
+| of which the literal string `"NaN"` | 1 (`P09651-2`) |
+| isoform-suffixed accessions in the dataset | 56 |
+| isoform-suffixed accessions lacking a value | **52 of 56** |
+| of the 104 missing, isoform-suffixed | 52 |
+
+The README and `failed_accessions.csv` report 103. The 104th is `P09651-2`, whose stored value is the
+string `"NaN"`; `pd.to_numeric(..., errors="coerce")` correctly turns it into a missing value, so no
+computed result is affected — but the count should read 104. Missingness is concentrated on isoform
+accessions, which is coherent: AlphaFold DB has no model for most isoforms.
+
+## 28. Literature: the narrow question
+
+The brief's question was not whether pLDDT relates to disorder, but whether the **fraction of
+residues below a pLDDT threshold has been validated as an estimator of the whole-protein fraction of
+curated disorder**. Searching OpenAlex for that specific claim
+(`protein-level disorder content AlphaFold pLDDT fraction correlation`,
+`fraction of residues pLDDT below 50 disorder content DisProt`,
+`AlphaFold confidence whole-protein disorder fraction estimator`, and
+`pLDDT threshold disorder content per protein agreement curated`) returns **no such validation
+study**. The adjacent literature is about residue- and region-level behaviour:
+
+* `Alderson2023` — conditionally folded IDRs predicted confidently by AlphaFold2. The mechanism
+  behind the short-protein failure mode; **added to the bibliography by this audit**.
+* `PiovesanEtAl2022` — disorder and conditional folding across AlphaFold DB.
+* `Necci2021`, `DelConte2023`, `Mehdiabadi2025` — CAID rounds 1–3, residue-level performance.
+* `RuffPappu2021`, `WilsonEtAl2022`, `Akdel2022` — why confidence is not disorder.
+
+Keeping the three claim levels of the brief apart:
+
+| Level | Claim | Status here |
+|---|---|---|
+| **A — residue** | low pLDDT carries information about disorder at individual residues | **supported**, and by the CAID literature. Nothing here contradicts it |
+| **B — segment** | low-confidence stretches overlap disordered regions | **supported**; not tested in detail here |
+| **C — whole-protein fraction** | the low-pLDDT fraction estimates the curated disordered fraction across proteins | **this is the repository's subject.** Correlated but not calibrated; strongly length-dependent; threshold-sensitive |
+
+## 29. Biological verdict: BIO-B (qualified negative result)
+
+Field semantics are confirmed, the reconstruction agrees, and the mappings are sound — but annotation
+coverage, protein length and threshold choice **substantially limit the generality** of the negative
+result, and two specific sub-claims from the previous audit are withdrawn outright (§31). BIO-A is
+unavailable because the extreme-group result does not survive; BIO-C does not apply because the field
+*is* a direct pLDDT fraction; BIO-D would overstate matters because the calibration failure itself is
+real; BIO-E does not apply because the question was answered.
+
+## 30. Biological wording now justified
+
+> In this DisProt sample the AlphaFold-derived very-low-confidence fraction (`pLDDT < 50`) is a
+> correlated but poorly calibrated protein-level index of curated disorder content: the descriptive
+> slope against the curated fraction is 0.11 (0.33 among proteins of at least 300 residues) with a
+> mean absolute deviation of 0.20, and the residual offset differs by taxon. Its apparent weakness is
+> substantially a protein-length artefact — length is negatively associated with the curated fraction
+> and positively with the low-confidence fraction, so the pooled Spearman correlation of 0.10 rises
+> to 0.32 when length is held constant, and a comparison of fully-annotated-disordered against
+> sparsely-annotated proteins reverses from an AUROC of 0.48 to 0.81 under length matching. The
+> failure is also specific to the very-low band: using the low-confidence boundary (`pLDDT < 70`)
+> instead raises the same AUROC to 0.76 without length matching. Because DisProt annotates a median
+> of 12.7% of each sequence and almost never annotates ordered residues, the curated fraction is a
+> per-protein lower bound of varying tightness, and these figures should be read as agreement between
+> two partial indices rather than as validation against ground truth. Nothing here bears on
+> residue-level disorder prediction, where low pLDDT separates annotated-disordered from unassessed
+> residues with an AUROC of 0.78 in the same data and where published benchmarks are good.
+
+## 31. Claims withdrawn by this audit
+
+Withdrawn from §12.1 above, and from the README summary added in the first audit commit:
+
+1. **"The proxy does not separate fully-disordered from nearly-ordered proteins."** Withdrawn. It was
+   a length confound; under length matching the AUROC is 0.81. The underlying numbers (medians 0.148
+   and 0.160) are correct but not comparable.
+2. **"The very-low-confidence fraction is range-compressed."** Withdrawn. IQR ratio is 1.05 pooled and
+   1.64 for proteins of at least 300 residues — not compressed.
+3. **"Across a 53-fold span of curated disorder the proxy's median moves only within 0.12–0.28."**
+   Withdrawn as an interpretation: the deciles of curated disorder are a length gradient (median
+   length 882 aa down to 228 aa), so that table measures length, not calibration.
+
+Retained and strengthened: the field's semantics (now verified), the absence of one-to-one
+calibration, the taxon-dependent offsets (attenuated but present), and the fact that residue-level
+signal coexists with moderate protein-level agreement.
