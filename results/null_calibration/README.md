@@ -88,7 +88,9 @@ and were not implemented.
 ## Environment / dependency note
 
 The active environment's NumPy is **1.26.4**, while this repository's
-`pyproject.toml`/`requirements.txt` declare NumPy>=2.0. This is an
+`requirements.txt` declares NumPy>=2.0. (This note previously also cited a
+`pyproject.toml`; the repository has no such file — `requirements.txt` and
+`requirements-lock.txt` are the only dependency declarations.) This is an
 **ENVIRONMENT/DEPENDENCY MISMATCH**, not a defect in `src/02_asymmetry.py`:
 that script's use of `np.trapezoid` (added in NumPy 2.0) would raise
 `AttributeError` in this specific environment, but that is a property of
